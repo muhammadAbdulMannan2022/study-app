@@ -25,7 +25,7 @@ export default function QuestionScreen() {
   
   // Timer State
   const [timerEnabled, setTimerEnabled] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60); // Default 60s
+  const [timeLeft, setTimeLeft] = useState(1); // Default 60s
   const [timerRunning, setTimerRunning] = useState(false);
   const timerRef = useRef<any>(null);
 
@@ -69,18 +69,31 @@ export default function QuestionScreen() {
        setQuestionData(finalData);
        
        if (timerEnabled) {
-           setTimeLeft(60);
+           setTimeLeft(1);
            setTimerRunning(true);
            startTimer();
        }
 
     } catch (error: any) {
       console.error("Fetch Error:", error);
-      const errorMessage = error.message?.includes("API_KEY_INVALID") 
-        ? "Invalid API Key. Please update it in settings."
-        : "Failed to generate question. Using sample question instead.";
       
-      Alert.alert('Status', errorMessage);
+      const isKeyError = error.message?.includes("API_KEY_INVALID") || 
+                         error.message?.includes("API_KEY_EXPIRED") ||
+                         error.message?.includes("forbidden") ||
+                         error.message?.includes("403");
+
+      if (isKeyError) {
+        Alert.alert(
+          'API Key Error', 
+          'Your Gemini API Key seems to be invalid or expired. Would you like to update it now?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Update Key', onPress: () => router.push('/(onboarding)/apikey') }
+          ]
+        );
+      } else {
+        Alert.alert('Status', 'Failed to generate question. Using sample question instead.');
+      }
       
       setQuestionData({
           question: "Explain the concept of **Elasticity** in economics. Use the formula: $E_d = \\frac{\\% \\Delta Q_d}{\\% \\Delta P}$",
@@ -111,11 +124,8 @@ export default function QuestionScreen() {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
-          stopTimer();
-          return 0;
-        }
-        return prev - 1;
+       
+        return prev + 1;
       });
     }, 1000);
   };

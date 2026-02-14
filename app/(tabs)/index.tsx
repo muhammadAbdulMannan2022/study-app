@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { SUBJECTS, QUESTION_TYPES } from "@/constants/Subjects";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 // Helper to get icon for subject
 const getSubjectIcon = (id: string): keyof typeof Ionicons.glyphMap => {
@@ -28,6 +29,7 @@ const getSubjectIcon = (id: string): keyof typeof Ionicons.glyphMap => {
 export default function SelectionScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const bottom = useBottomTabBarHeight()
 
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedPaper, setSelectedPaper] = useState<string | null>(null);
@@ -68,63 +70,36 @@ export default function SelectionScreen() {
     });
   };
 
+  const isReady = !!(
+    selectedSubject &&
+    (selectedPaper || (isCustomPaper && customPaperText.trim())) &&
+    (selectedTopic || (isCustomTopic && customTopicText.trim())) &&
+    selectedType
+  );
+
   return (
-    <View
-      style={{ flex: 1, backgroundColor: "#f9fafb", paddingTop: insets.top }}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f9fafb", paddingTop: insets.top }}>
       <ScrollView
-        contentContainerStyle={{ padding: 24, paddingBottom: 160 }}
+        contentContainerStyle={{ padding: 24, paddingBottom: 180 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header Section */}
         <View style={{ marginBottom: 32, marginTop: 8 }}>
-          <Text
-            style={{
-              color: "#6B7280",
-              fontWeight: "500",
-              fontSize: 16,
-              marginBottom: 4,
-            }}
-          >
+          <Text style={{ color: "#6B7280", fontWeight: "500", fontSize: 16, marginBottom: 4 }}>
             Ready to learn?
           </Text>
-          <Text
-            style={{
-              fontSize: 32,
-              fontWeight: "bold",
-              color: "#111827",
-              letterSpacing: -0.5,
-            }}
-          >
+          <Text style={{ fontSize: 32, fontWeight: "bold", color: "#111827", letterSpacing: -0.5 }}>
             Practice Dashboard
           </Text>
         </View>
 
         {/* Step 1: Subject Cards */}
         <View style={{ marginBottom: 32 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 16,
-            }}
-          >
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: "#2563EB",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 12,
-              }}
-            >
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+            <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#2563EB", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
               <Text style={{ color: "white", fontWeight: "bold" }}>1</Text>
             </View>
-            <Text
-              style={{ fontSize: 20, fontWeight: "bold", color: "#111827" }}
-            >
+            <Text style={{ fontSize: 20, fontWeight: "bold", color: "#111827" }}>
               Choose a Subject
             </Text>
           </View>
@@ -159,43 +134,18 @@ export default function SelectionScreen() {
                     elevation: 3,
                   }}
                 >
-                  <View
-                    style={{
-                      padding: 12,
-                      borderRadius: 12,
-                      backgroundColor: isSelected ? "#EFF6FF" : "#F3F4F6",
-                      marginRight: 16,
-                    }}
-                  >
-                    <Ionicons
-                      name={iconName}
-                      size={24}
-                      color={isSelected ? "#2563EB" : "#6B7280"}
-                    />
+                  <View style={{ padding: 12, borderRadius: 12, backgroundColor: isSelected ? "#EFF6FF" : "#F3F4F6", marginRight: 16 }}>
+                    <Ionicons name={iconName} size={24} color={isSelected ? "#2563EB" : "#6B7280"} />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontWeight: "bold",
-                        color: isSelected ? "#1E40AF" : "#111827",
-                      }}
-                    >
+                    <Text style={{ fontSize: 18, fontWeight: "bold", color: isSelected ? "#1E40AF" : "#111827" }}>
                       {subject.name}
                     </Text>
-                    <Text
-                      style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}
-                    >
+                    <Text style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}>
                       {subject.papers?.length} Courses available
                     </Text>
                   </View>
-                  {isSelected && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={24}
-                      color="#2563EB"
-                    />
-                  )}
+                  {isSelected && <Ionicons name="checkmark-circle" size={24} color="#2563EB" />}
                 </TouchableOpacity>
               );
             })}
@@ -205,29 +155,11 @@ export default function SelectionScreen() {
         {/* Step 2: Paper Selection */}
         {selectedSubject && (
           <View style={{ marginBottom: 32 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <View
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#4F46E5",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginRight: 12,
-                }}
-              >
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+              <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#4F46E5", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
                 <Text style={{ color: "white", fontWeight: "bold" }}>2</Text>
               </View>
-              <Text
-                style={{ fontSize: 20, fontWeight: "bold", color: "#111827" }}
-              >
+              <Text style={{ fontSize: 20, fontWeight: "bold", color: "#111827" }}>
                 Select Course / Paper
               </Text>
             </View>
@@ -253,12 +185,7 @@ export default function SelectionScreen() {
                       borderColor: isSelected ? "#4F46E5" : "#E5E7EB",
                     }}
                   >
-                    <Text
-                      style={{
-                        fontWeight: "600",
-                        color: isSelected ? "white" : "#374151",
-                      }}
-                    >
+                    <Text style={{ fontWeight: "600", color: isSelected ? "white" : "#374151" }}>
                       {paper.name}
                     </Text>
                   </TouchableOpacity>
@@ -270,7 +197,7 @@ export default function SelectionScreen() {
                   setIsCustomPaper(true);
                   setSelectedPaper(null);
                   setSelectedTopic(null);
-                  setIsCustomTopic(true); // Usually custom paper means custom topic too
+                  setIsCustomTopic(true);
                 }}
                 style={{
                   paddingHorizontal: 16,
@@ -284,17 +211,8 @@ export default function SelectionScreen() {
                   gap: 8,
                 }}
               >
-                <Ionicons
-                  name="add-circle-outline"
-                  size={20}
-                  color={isCustomPaper ? "white" : "#4B5563"}
-                />
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    color: isCustomPaper ? "white" : "#4B5563",
-                  }}
-                >
+                <Ionicons name="add-circle-outline" size={20} color={isCustomPaper ? "white" : "#4B5563"} />
+                <Text style={{ fontWeight: "bold", color: isCustomPaper ? "white" : "#4B5563" }}>
                   Other / Custom Course
                 </Text>
               </TouchableOpacity>
@@ -323,29 +241,11 @@ export default function SelectionScreen() {
         {/* Step 3: Topic Selection */}
         {(selectedPaper || isCustomPaper) && (
           <View style={{ marginBottom: 32 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <View
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#0D9488",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginRight: 12,
-                }}
-              >
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+              <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#0D9488", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
                 <Text style={{ color: "white", fontWeight: "bold" }}>3</Text>
               </View>
-              <Text
-                style={{ fontSize: 20, fontWeight: "bold", color: "#111827" }}
-              >
+              <Text style={{ fontSize: 20, fontWeight: "bold", color: "#111827" }}>
                 Select Topic
               </Text>
             </View>
@@ -353,8 +253,7 @@ export default function SelectionScreen() {
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               {!isCustomPaper &&
                 currentPaperObj?.chapters?.map((chapter) => {
-                  const isSelected =
-                    selectedTopic === chapter && !isCustomTopic;
+                  const isSelected = selectedTopic === chapter && !isCustomTopic;
                   return (
                     <TouchableOpacity
                       key={chapter}
@@ -371,13 +270,7 @@ export default function SelectionScreen() {
                         borderColor: isSelected ? "#0D9488" : "#E5E7EB",
                       }}
                     >
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          fontWeight: "500",
-                          color: isSelected ? "white" : "#374151",
-                        }}
-                      >
+                      <Text style={{ fontSize: 14, fontWeight: "500", color: isSelected ? "white" : "#374151" }}>
                         {chapter}
                       </Text>
                     </TouchableOpacity>
@@ -401,17 +294,8 @@ export default function SelectionScreen() {
                   gap: 6,
                 }}
               >
-                <Ionicons
-                  name="pencil"
-                  size={16}
-                  color={isCustomTopic ? "white" : "#4B5563"}
-                />
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    color: isCustomTopic ? "white" : "#4B5563",
-                  }}
-                >
+                <Ionicons name="pencil" size={16} color={isCustomTopic ? "white" : "#4B5563"} />
+                <Text style={{ fontWeight: "bold", color: isCustomTopic ? "white" : "#4B5563" }}>
                   Custom Topic
                 </Text>
               </TouchableOpacity>
@@ -439,48 +323,18 @@ export default function SelectionScreen() {
         )}
 
         {/* Step 4: Type Selection */}
-        {(selectedTopic || (isCustomTopic && customTopicText)) && (
+        {(selectedTopic || (isCustomTopic && customTopicText.trim())) && (
           <View style={{ marginBottom: 32 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <View
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#7C3AED",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginRight: 12,
-                }}
-              >
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+              <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "#7C3AED", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
                 <Text style={{ color: "white", fontWeight: "bold" }}>4</Text>
               </View>
-              <Text
-                style={{ fontSize: 20, fontWeight: "bold", color: "#111827" }}
-              >
+              <Text style={{ fontSize: 20, fontWeight: "bold", color: "#111827" }}>
                 Question Format
               </Text>
             </View>
 
-            <View
-              style={{
-                backgroundColor: "white",
-                padding: 8,
-                borderRadius: 24,
-                borderWidth: 1,
-                borderColor: "#F3F4F6",
-                flexDirection: "row",
-                flexWrap: "wrap",
-                gap: 8,
-              }}
-              className="border border-red-400"
-            >
+            <View style={{ backgroundColor: "white", padding: 8, borderRadius: 24, borderWidth: 1, borderColor: "#F3F4F6", flexDirection: "row", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
               {QUESTION_TYPES.map((type) => {
                 const isSelected = selectedType === type.id;
                 return (
@@ -497,22 +351,13 @@ export default function SelectionScreen() {
                       borderColor: isSelected ? "#C084FC" : "transparent",
                       alignItems: "center",
                       flexDirection: "row",
-
+                      // justifyContent: "center",
+                      paddingHorizontal: 12,
                       gap: 8,
                     }}
-                    className=" px-4"
                   >
-                    <Ionicons
-                      name={isSelected ? "radio-button-on" : "radio-button-off"}
-                      size={18}
-                      color={isSelected ? "#7C3AED" : "#9CA3AF"}
-                    />
-                    <Text
-                      style={{
-                        fontWeight: "600",
-                        color: isSelected ? "#7C3AED" : "#4B5563",
-                      }}
-                    >
+                    <Ionicons name={isSelected ? "radio-button-on" : "radio-button-off"} size={18} color={isSelected ? "#7C3AED" : "#9CA3AF"} />
+                    <Text style={{ fontWeight: "600", color: isSelected ? "#7C3AED" : "#4B5563" }}>
                       {type.name}
                     </Text>
                   </TouchableOpacity>
@@ -524,42 +369,40 @@ export default function SelectionScreen() {
       </ScrollView>
 
       {/* Floating Action Button */}
-      {selectedSubject &&
-        (selectedTopic || customTopicText) &&
-        selectedType && (
-          <View
-            style={{ position: "absolute", bottom: 30, left: 24, right: 24 }}
+      {isReady && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: bottom +30,
+            left: 24,
+            right: 24,
+            zIndex: 1000,
+            elevation: 10,
+          }}
+        >
+          <TouchableOpacity
+            onPress={handleGenerate}
+            activeOpacity={0.8}
+            style={{
+              backgroundColor: "#111827",
+              paddingVertical: 20,
+              borderRadius: 24,
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.3,
+              shadowRadius: 20,
+            }}
           >
-            <TouchableOpacity
-              onPress={handleGenerate}
-              style={{
-                backgroundColor: "#111827",
-                paddingVertical: 20,
-                borderRadius: 24,
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 20,
-                elevation: 10,
-              }}
-            >
-              <Ionicons
-                name="sparkles"
-                size={24}
-                color="#FFD700"
-                style={{ marginRight: 12 }}
-              />
-              <Text
-                style={{ color: "white", fontWeight: "bold", fontSize: 18 }}
-              >
-                Generate Practice Set
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+            <Ionicons name="sparkles" size={24} color="#FFD700" style={{ marginRight: 12 }} />
+            <Text style={{ color: "white", fontWeight: "bold", fontSize: 18 }}>
+              Generate Practice Set
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }

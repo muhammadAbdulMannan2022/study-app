@@ -35,9 +35,10 @@ export default function RootLayout() {
       try {
         const apiKey = await SecureStore.getItemAsync('gemini_api_key');
         const inOnboarding = segments[0] === '(onboarding)';
+        const isHelpPage = segments[0] === 'how-to-get-key';
         
-        // Only redirect to onboarding if no API key is found
-        if (!apiKey && !inOnboarding) {
+        // Only redirect to onboarding if no API key is found AND we are not on a help page
+        if (!apiKey && !inOnboarding && !isHelpPage) {
           router.replace('/(onboarding)/apikey');
         } else if (apiKey && inOnboarding) {
           router.replace('/(tabs)');
