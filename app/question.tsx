@@ -100,7 +100,8 @@ export default function QuestionScreen() {
            question: questionData.question,
            answer: questionData.answer,
            type: typeId as string,
-           math: questionData.math
+           math: questionData.math,
+           options: questionData.options
       });
       setSaved(true);
       Alert.alert("Saved", "Question saved to your collection.");
@@ -238,15 +239,40 @@ export default function QuestionScreen() {
                 <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#2563EB', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12, marginTop: 10 }}>The Question</Text>
                     <View style={{ flex: 1 }}>
-                        {questionData?.math ? (
-                            <MathRenderer content={questionData.question} fullHeight={true} />
-                        ) : (
-                            <ScrollView showsVerticalScrollIndicator={false}>
-                                <Text style={{ fontSize: 22, color: '#111827', lineHeight: 32, fontWeight: '500' }}>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            {questionData?.math ? (
+                                <MathRenderer content={questionData.question} />
+                            ) : (
+                                <Text style={{ fontSize: 22, color: '#111827', lineHeight: 32, fontWeight: '500', marginBottom: 20 }}>
                                     {questionData?.question}
                                 </Text>
-                            </ScrollView>
-                        )}
+                            )}
+                            
+                            {/* MCQ Options */}
+                            {questionData?.options && questionData.options.length > 0 && (
+                                <View style={{ gap: 12, marginTop: 10, paddingBottom: 20 }}>
+                                    {questionData.options.map((opt: string, idx: number) => (
+                                        <View 
+                                            key={idx} 
+                                            style={{ 
+                                                backgroundColor: '#F9FAFB', 
+                                                padding: 16, 
+                                                borderRadius: 16, 
+                                                borderWidth: 1, 
+                                                borderColor: '#E5E7EB',
+                                                flexDirection: 'row',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', marginRight: 12, borderWidth: 1, borderColor: '#D1D5DB' }}>
+                                                <Text style={{ fontWeight: 'bold', color: '#4B5563' }}>{String.fromCharCode(65 + idx)}</Text>
+                                            </View>
+                                            <Text style={{ fontSize: 18, color: '#374151', flex: 1 }}>{opt}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
+                        </ScrollView>
                     </View>
                 </View>
             ) : (

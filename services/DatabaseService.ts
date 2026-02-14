@@ -16,16 +16,18 @@ const _init = async () => {
         answer TEXT NOT NULL,
         type TEXT,
         date TEXT,
-        math INTEGER DEFAULT 0
+        math INTEGER DEFAULT 0,
+        options TEXT
       );
     `);
-    await database.runAsync(`
-      CREATE TABLE IF NOT EXISTS streaks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT UNIQUE,
-        count INTEGER
-      );
-    `);
+
+    // Migration: Check if options column exists, if not add it
+    try {
+        await database.runAsync('ALTER TABLE questions ADD COLUMN options TEXT;');
+    } catch (e) {
+        // Column probably already exists
+    }
+
     console.log('Database initialized successfully');
     return database;
 };
@@ -48,15 +50,17 @@ export const initDatabase = async () => {
   }
 };
 
-export const saveQuestion = async (q: { topic: string, question: string, answer: string, type: string, math: boolean }) => {
+export const saveQuestion = async (q: { topic: string, question: string, answer: string, type: string, math: boolean, options?: string[] }) => {
   try {
     const database = await initDatabase();
     if (!database) return;
 
     const date = new Date().toISOString();
+    const optionsJson = q.options ? JSON.stringify(q.options) : null;
+
     await database.runAsync(
-      'INSERT INTO questions (topic, question, answer, type, date, math) VALUES (?, ?, ?, ?, ?, ?)',
-      q.topic, q.question, q.answer, q.type, date, q.math ? 1 : 0
+      'INSERT INTO questions (topic, question, answer, type, date, math, options) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      q.topic, q.question, q.answer, q.type, date, q.math ? 1 : 0, optionsJson
     );
     console.log('Question saved');
   } catch (e) {

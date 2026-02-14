@@ -154,30 +154,63 @@ export default function SavedQuestionsScreen() {
                       <View style={{ flex: 1 }}>
                           <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#2563EB', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16, marginTop: 10 }}>The Question</Text>
                           <View style={{ flex: 1 }}>
-                              {selectedQuestion?.math ? (
-                                  <MathRenderer content={selectedQuestion.question} fullHeight={true} />
-                              ) : (
-                                  <ScrollView>
-                                      <Text style={{ fontSize: 20, color: '#111827', lineHeight: 30, fontWeight: '500' }}>
+                              <ScrollView showsVerticalScrollIndicator={false}>
+                                  {selectedQuestion?.math ? (
+                                      <MathRenderer content={selectedQuestion.question} />
+                                  ) : (
+                                      <Text style={{ fontSize: 22, color: '#111827', lineHeight: 32, fontWeight: '500', marginBottom: 20 }}>
                                           {selectedQuestion?.question}
                                       </Text>
-                                  </ScrollView>
-                              )}
+                                  )}
+                                  
+                                  {/* MCQ Options for Saved Questions */}
+                                  {(() => {
+                                      try {
+                                          const opts = selectedQuestion?.options ? JSON.parse(selectedQuestion.options) : null;
+                                          if (opts && Array.isArray(opts) && opts.length > 0) {
+                                              return (
+                                                  <View style={{ gap: 12, marginTop: 10, paddingBottom: 20 }}>
+                                                      {opts.map((opt: string, idx: number) => (
+                                                          <View 
+                                                              key={idx} 
+                                                              style={{ 
+                                                                  backgroundColor: '#F9FAFB', 
+                                                                  padding: 16, 
+                                                                  borderRadius: 16, 
+                                                                  borderWidth: 1, 
+                                                                  borderColor: '#E5E7EB',
+                                                                  flexDirection: 'row',
+                                                                  alignItems: 'center'
+                                                              }}
+                                                          >
+                                                              <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', marginRight: 12, borderWidth: 1, borderColor: '#D1D5DB' }}>
+                                                                  <Text style={{ fontWeight: 'bold', color: '#4B5563' }}>{String.fromCharCode(65 + idx)}</Text>
+                                                              </View>
+                                                              <Text style={{ fontSize: 18, color: '#374151', flex: 1 }}>{opt}</Text>
+                                                          </View>
+                                                      ))}
+                                                  </View>
+                                              );
+                                          }
+                                      } catch (e) { return null; }
+                                      return null;
+                                  })()}
+                              </ScrollView>
                           </View>
                       </View>
                   ) : (
                       <View style={{ flex: 1 }}>
                           <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#16a34a', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16, marginTop: 10 }}>The Solution</Text>
                           <View style={{ flex: 1 }}>
-                              {selectedQuestion?.math ? (
-                                  <MathRenderer content={selectedQuestion.answer} fullHeight={true} />
-                              ) : (
-                                  <ScrollView>
-                                      <Text style={{ fontSize: 20, color: '#111827', lineHeight: 30, fontWeight: '500' }}>
+                              <ScrollView showsVerticalScrollIndicator={false}>
+                                  {selectedQuestion?.math ? (
+                                      <MathRenderer content={selectedQuestion.answer} fullHeight={true} />
+                                  ) : (
+                                      <Text style={{ fontSize: 22, color: '#111827', lineHeight: 32, fontWeight: '500' }}>
                                           {selectedQuestion?.answer}
                                       </Text>
-                                  </ScrollView>
-                              )}
+                                  )}
+                              </ScrollView>
                           </View>
                       </View>
                   )}
