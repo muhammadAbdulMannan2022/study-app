@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, ScrollView, Modal } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, ScrollView, Modal, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
@@ -38,25 +38,60 @@ export default function SavedQuestionsScreen() {
       setViewMode('question');
   };
 
+  const confirmDelete = (id: number, questionPreview: string) => {
+    Alert.alert(
+      'Delete Question',
+      `Are you sure you want to delete this question?\n\n"${questionPreview.substring(0, 50)}..."`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: () => handleDelete(id)
+        }
+      ]
+    );
+  };
+
   const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity 
-        className="mb-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex-row items-center" 
+    <View className="mb-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <TouchableOpacity 
+        className="flex-row items-center flex-1" 
         onPress={() => openQuestion(item)}
-    >
+      >
         <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-4">
-            <Ionicons name="document-text" size={20} color="#2563EB" />
+          <Ionicons name="document-text" size={20} color="#2563EB" />
         </View>
         <View className="flex-1">
-            <Text className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-0.5">{item.topic}</Text>
-            <Text className="text-gray-900 font-semibold" numberOfLines={1}>
-                {item.question.replace(/\$|\*\*|_/g, '').trim() || 'Question'}
-            </Text>
-            <Text className="text-[10px] text-gray-400 mt-1">
-                {item.type} • {new Date(item.date).toLocaleDateString()}
-            </Text>
+          <Text className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-0.5">{item.topic}</Text>
+          <Text className="text-gray-900 font-semibold" numberOfLines={1}>
+            {item.question.replace(/\$|\*\*|_/g, '').trim() || 'Question'}
+          </Text>
+          <Text className="text-[10px] text-gray-400 mt-1">
+            {item.type} • {new Date(item.date).toLocaleDateString()}
+          </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
-    </TouchableOpacity>
+      </TouchableOpacity>
+      
+      {/* Delete Button */}
+      <TouchableOpacity 
+        onPress={() => confirmDelete(item.id, item.question.replace(/\$|\*\*|_/g, '').trim())}
+        style={{ 
+          position: 'absolute', 
+          top: 12, 
+          right: 12, 
+          backgroundColor: '#FEE2E2', 
+          borderRadius: 20, 
+          width: 36, 
+          height: 36, 
+          alignItems: 'center', 
+          justifyContent: 'center' 
+        }}
+      >
+        <Ionicons name="trash-outline" size={18} color="#EF4444" />
+      </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -105,7 +140,7 @@ export default function SavedQuestionsScreen() {
                       <Ionicons name="close" size={28} color="black" />
                   </TouchableOpacity>
                   <Text style={{ fontWeight: 'bold', fontSize: 18, color: '#111827' }}>{selectedQuestion?.topic || 'Details'}</Text>
-                  <TouchableOpacity onPress={() => handleDelete(selectedQuestion?.id)}>
+                  <TouchableOpacity onPress={() => confirmDelete(selectedQuestion?.id, selectedQuestion?.question.replace(/\$|\*\*|_/g, '').trim())}>
                       <Ionicons name="trash-outline" size={24} color="#EF4444" />
                   </TouchableOpacity>
               </View>
@@ -154,9 +189,12 @@ export default function SavedQuestionsScreen() {
                       <View style={{ flex: 1 }}>
                           <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#2563EB', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16, marginTop: 10 }}>The Question</Text>
                           <View style={{ flex: 1 }}>
-                              <ScrollView showsVerticalScrollIndicator={false}>
+                              <ScrollView 
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                              >
                                   {selectedQuestion?.math ? (
-                                      <MathRenderer content={selectedQuestion.question} />
+                                      <MathRenderer content={selectedQuestion.question} fullHeight={true} />
                                   ) : (
                                       <Text style={{ fontSize: 22, color: '#111827', lineHeight: 32, fontWeight: '500', marginBottom: 20 }}>
                                           {selectedQuestion?.question}
@@ -202,7 +240,10 @@ export default function SavedQuestionsScreen() {
                       <View style={{ flex: 1 }}>
                           <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#16a34a', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16, marginTop: 10 }}>The Solution</Text>
                           <View style={{ flex: 1 }}>
-                              <ScrollView showsVerticalScrollIndicator={false}>
+                              <ScrollView 
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ flexGrow: 1 }}
+                              >
                                   {selectedQuestion?.math ? (
                                       <MathRenderer content={selectedQuestion.answer} fullHeight={true} />
                                   ) : (

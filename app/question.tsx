@@ -54,8 +54,8 @@ export default function QuestionScreen() {
       } catch (err) {
          console.log("Gemini generation failed, using fallback", err);
          data = {
-             question: "Explain the concept of **Elasticity** in economics. Use the formula: $E_d = \\frac{\\% \\Delta Q_d}{\\% \\Delta P}$",
-             answer: "Elasticity measures the responsiveness of quantity demanded to a change in price. If $E_d > 1$, demand is elastic.",
+             question: "যখন মূল্য $10 থেকে $12 বৃদ্ধি পায় এবং চাহিদার পরিমাণ 100 থেকে 80 একক হ্রাস পায়, তখন **চাহিদার মূল্য স্থিতিস্থাপকতা** (price elasticity of demand) নির্ণয় করুন। সূত্র ব্যবহার করুন: $$E_d = \\frac{\\% \\Delta Q_d}{\\% \\Delta P}$$",
+             answer: "**ধাপ ১:** পরিমাণের শতকরা পরিবর্তন: $\\frac{80-100}{100} \\times 100 = -20\\%$\n\n**ধাপ ২:** মূল্যের শতকরা পরিবর্তন: $\\frac{12-10}{10} \\times 100 = 20\\%$\n\n**ধাপ ৩:** স্থিতিস্থাপকতা নির্ণয়: $E_d = \\frac{-20\\%}{20\\%} = -1$\n\n**সিদ্ধান্ত:** চাহিদার মূল্য স্থিতিস্থাপকতা $-1$, যা **একক স্থিতিস্থাপক চাহিদা** নির্দেশ করে। মূল্যের 1% বৃদ্ধি চাহিদার পরিমাণে 1% হ্রাস ঘটায়।",
              math: true
          };
       }
@@ -96,8 +96,8 @@ export default function QuestionScreen() {
       }
       
       setQuestionData({
-          question: "Explain the concept of **Elasticity** in economics. Use the formula: $E_d = \\frac{\\% \\Delta Q_d}{\\% \\Delta P}$",
-          answer: "Elasticity measures the responsiveness of quantity demanded to a change in price. If $E_d > 1$, demand is elastic.",
+          question: "**GDP (Gross Domestic Product)** কী এবং ব্যয় পদ্ধতি (expenditure approach) ব্যবহার করে এটি কীভাবে গণনা করা হয়? সূত্র লিখুন।",
+          answer: "**GDP** হলো একটি নির্দিষ্ট সময়ে একটি দেশের সীমানার মধ্যে উৎপাদিত সকল চূড়ান্ত পণ্য ও সেবার মোট আর্থিক মূল্য।\n\n**ব্যয় পদ্ধতির সূত্র:**\n$$GDP = C + I + G + (X - M)$$\n\nযেখানে:\n- $C$ = ভোক্তা ব্যয় (Consumer spending)\n- $I$ = বিনিয়োগ (Investment)\n- $G$ = সরকারি ব্যয় (Government spending)\n- $X$ = রপ্তানি (Exports)\n- $M$ = আমদানি (Imports)\n\nএই পদ্ধতি অর্থনীতিতে সকল ব্যয়ের সমষ্টি নির্ণয় করে।",
           math: true
       });
     } finally {
@@ -249,9 +249,12 @@ export default function QuestionScreen() {
                 <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#2563EB', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12, marginTop: 10 }}>The Question</Text>
                     <View style={{ flex: 1 }}>
-                        <ScrollView showsVerticalScrollIndicator={false}>
+                        <ScrollView 
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={{ flexGrow: 1 }}
+                        >
                             {questionData?.math ? (
-                                <MathRenderer content={questionData.question} />
+                                <MathRenderer content={questionData.question} fullHeight={true} />
                             ) : (
                                 <Text style={{ fontSize: 22, color: '#111827', lineHeight: 32, fontWeight: '500', marginBottom: 20 }}>
                                     {questionData?.question}

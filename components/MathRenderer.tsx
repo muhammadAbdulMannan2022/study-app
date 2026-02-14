@@ -3,16 +3,22 @@ import React from 'react';
 import { WebView } from 'react-native-webview';
 import { Text, View } from 'react-native';
 
-const katexStyle = `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">`;
-const katexScript = `<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>`;
-const autoRenderScript = `<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>`;
-
-const generateHtml = (content: string) => `
+const generateHtml = (content: string) => {
+  console.log('MathRenderer - Generating HTML for content:', content?.substring(0, 100));
+  
+  // Escape content for textarea
+  const escapedContent = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+  
+  return `
 <!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    ${katexStyle}
+    <meta charset="UTF-8">
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -23,79 +29,92 @@ const generateHtml = (content: string) => `
             margin: 0; 
             background-color: transparent;
         }
-        .katex { font-size: 1.1em; }
-        .katex-display { margin: 1em 0; overflow-x: auto; overflow-y: hidden; }
         img { max-width: 100%; height: auto; }
         strong { font-weight: 700; color: #111827; }
         em { font-style: italic; }
+        .MathJax { font-size: 1.1em !important; }
     </style>
-    ${katexScript}
-    ${autoRenderScript}
+    
+    <!-- MathJax Configuration -->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\\\(', '\\\\)']],
+          displayMath: [['$$', '$$'], ['\\\\[', '\\\\]']],
+          processEscapes: true,
+          processEnvironments: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        },
+        startup: {
+          pageReady: () => {
+            return MathJax.startup.defaultPageReady().then(() => {
+              sendHeight();
+            });
+          }
+        }
+      };
+    </script>
+    
+    <!-- MathJax Library -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
 </head>
 <body>
-    <textarea id="content" style="display:none;">${content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+    <textarea id="content" style="display:none;">${escapedContent}</textarea>
     <div id="render-target"></div>
 
     <script>
+      function sendHeight() {
+          var height = document.body.scrollHeight;
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(String(height));
+          }
+      }
+
       document.addEventListener("DOMContentLoaded", function() {
-        const rawContent = document.getElementById('content').value;
-        
-        const mathSegments = [];
-        const mathRegex = /(\\$\\$[\\s\\S]*?\\$\\$|\\$[\\s\\S]*?\\$|\\\\[[\\s\\S]*?\\\\]|\\\\([\\s\\S]*?\\\\))/g;
-        
-        const protectedText = rawContent.replace(mathRegex, function(match) {
-            mathSegments.push(match);
-            return '<span class="math-placeholder" data-index="' + (mathSegments.length - 1) + '"></span>';
-        });
+        try {
+          const rawContent = document.getElementById('content').value;
+          
+          // Process markdown
+          let html = rawContent;
+          
+          // Bold: **text**
+          html = html.replace(/\\*{2}([^*]+)\\*{2}/g, '<strong>$1</strong>');
+          
+          // Italic: *text*
+          html = html.replace(/\\*([^*]+)\\*/g, '<em>$1</em>');
+          
+          // Line breaks
+          html = html.replace(/\\n/g, '<br>');
 
-        const html = protectedText
-            .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
-            .replace(/\\*(.*?)\\*/g, '<em>$1</em>')
-            .replace(/\\n/g, '<br>');
+          const target = document.getElementById('render-target');
+          target.innerHTML = html;
 
-        const target = document.getElementById('render-target');
-        target.innerHTML = html;
-
-        // Restore Math
-        const placeholders = document.querySelectorAll('.math-placeholder');
-        placeholders.forEach(el => {
-            const index = parseInt(el.getAttribute('data-index'));
-            if (mathSegments[index]) {
-                const textNode = document.createTextNode(mathSegments[index]);
-                el.parentNode.replaceChild(textNode, el);
-            }
-        });
-
-        renderMathInElement(target, {
-          delimiters: [
-            {left: '$$', right: '$$', display: true},
-            {left: '$', right: '$', display: false},
-            {left: '\\\\(', right: '\\\\)', display: false},
-            {left: '\\\\[', right: '\\\\]', display: true}
-          ],
-          throwOnError : false
-        });
-
-        // Send height to React Native
-        // Use a loop to detect height changes (e.g. after images load)
-        function sendHeight() {
-            var height = document.body.scrollHeight;
-            window.ReactNativeWebView.postMessage(height);
+          // MathJax will automatically process the content
+          // Send height updates
+          setTimeout(sendHeight, 500);
+          setTimeout(sendHeight, 1000);
+          setTimeout(sendHeight, 2000);
+        } catch (error) {
+          document.getElementById('render-target').innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
         }
-        
-        setTimeout(sendHeight, 100);
-        setTimeout(sendHeight, 500);
-        setTimeout(sendHeight, 1500);
       });
     </script>
 </body>
 </html>
 `;
+};
 
 export default function MathRenderer({ content, fullHeight = false }: { content: string, fullHeight?: boolean }) {
   const [height, setHeight] = React.useState(fullHeight ? undefined : 150);
 
-  if (!content) return null;
+  console.log('MathRenderer component called with content:', content?.substring(0, 50), 'fullHeight:', fullHeight);
+
+  if (!content) {
+    console.log('MathRenderer: No content provided, returning null');
+    return null;
+  }
 
   return (
     <View style={{ flex: fullHeight ? 1 : 0, height: fullHeight ? undefined : height, width: '100%', overflow: 'hidden' }}>
